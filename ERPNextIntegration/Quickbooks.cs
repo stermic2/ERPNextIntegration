@@ -1,51 +1,59 @@
 using System;
+using System.IO;
+using System.Threading.Tasks;
 using ERPNextIntegration.QBO;
 using Microsoft.Extensions.Configuration;
-using RestSharp;
-using RestSharp.Authenticators;
-using Simple.OData.Client;
+using Newtonsoft.Json;
+using QuickBooksSharp;
 
 namespace ERPNextIntegration
 {
     public static class Quickbooks
     {
-        public static QuickbooksClient Client;
-        public static RestClient QboLoginClient;
+        private static AuthenticationService _authenticationService;
+        public static DataService DataService;
+        private static string _clientId;
+        private static string _clientSecret;
+        private static Token _tokensInMemory;
+        private static Token TokensOnDisk
+        {
+            get
+            {
+                using var r = new StreamReader(Directory.GetCurrentDirectory() + @"\tokens.txt");
+                var json = r.ReadToEnd();
+                var tokenFile = JsonConvert.DeserializeObject<Token>(json);
+                return tokenFile;
+            }
+            set
+            {
+                using var file = File.CreateText(Directory.GetCurrentDirectory() + @"\tokens.txt");
+                var serializer = new JsonSerializer();
+                serializer.Serialize(file, value);
+            }
+        }
         public static void InitializeQuickbooksClient(IConfiguration configuration)
         {
-            QboLoginClient = new RestClient(configuration.GetValue<string>("Urls:QboRefresh"));
-            Client = new QuickbooksClient(new ODataClientSettings
+            _clientId = configuration.GetValue<string>("Authentication:ClientId");
+            _clientSecret = configuration.GetValue<string>("Authentication:ClientSecret");
+            long.TryParse(configuration.GetValue<string>("Authentication:realmId"), out var realmId);
+            _authenticationService = new AuthenticationService();
+            _tokensInMemory = TokensOnDisk;
+            DataService = new DataService(_tokensInMemory.AccessToken, realmId, Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development");
+        }
+
+        public static async Task RefreshTokens()
+        {
+            if (_tokensInMemory.LastAccessTokenRefresh < DateTime.Now.Subtract(TimeSpan.FromMinutes(59)))
             {
-                BaseUri = new Uri(configuration.GetValue<string>("Urls:Qbo")),
-                PayloadFormat = ODataPayloadFormat.Json,
-                RequestTimeout = new TimeSpan(0, 1, 0),
-                BeforeRequest = request =>
-                {
-                    if (Client.LastQboLogin < DateTime.Now.Subtract(TimeSpan.FromMinutes(59)))
-                    {
-                        request.Headers.Add("Authorization", "Bearer " + Client.AccessToken);
-                        request.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
-                        request.Headers.Add("Accept", "application/json");
-                        request.Headers.Add("Cache-Control", "no-cache");
-                        request.Properties.Add("grant_type","refresh_token");
-                        request.Properties.Add("refresh_token",Client.RefreshToken);
-                        var req = new RestRequest(Client.RefreshToken)
-                            .AddHeader("Content-Type", "application/x-www-form-urlencoded")
-                            .AddHeader("Accept", "application/json")
-                            .AddHeader("Cache-Control", "no-cache")
-                            .AddParameter("grant_type", "refresh_token")
-                            .AddParameter("refresh_token", Client.RefreshToken);
-                        var result = QboLoginClient.Post<TokenRefreshResponse>(req);
-                        if (result.IsSuccessful)
-                        {
-                            Client.AccessToken = result.Data.accessToken;
-                            Client.RefreshToken = result.Data.refreshToken;
-                        }
-                    }
-                    request.Headers.Add("Accept","application/json");
-                    request.Headers.Add("Authorization", "Bearer " + Client.AccessToken);
-                }
-            });
+                var tokenResponse = await _authenticationService.RefreshOAuthTokenAsync(_clientId, _clientSecret, _tokensInMemory.RefreshToken);
+                _tokensInMemory.LastAccessTokenRefresh = DateTime.Now;
+                _tokensInMemory.LastRefreshTokenRefresh = _tokensInMemory.RefreshToken == tokenResponse.refresh_token
+                    ? DateTime.Now
+                    : _tokensInMemory.LastRefreshTokenRefresh;
+                _tokensInMemory.AccessToken = tokenResponse.access_token;
+                _tokensInMemory.RefreshToken = tokenResponse.refresh_token;
+                TokensOnDisk = _tokensInMemory;
+            }
         }
     }
 }
