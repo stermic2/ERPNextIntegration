@@ -1,6 +1,6 @@
 using System;
 
-namespace ERPNextIntegration.Dtos.Webhooks
+namespace ERPNextIntegration.Dtos.QBO
 {
     public class entity
     {

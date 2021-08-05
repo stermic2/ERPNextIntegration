@@ -46,6 +46,15 @@
           "lib/netstandard2.1/QuickBooksSharp.dll": {}
         }
       },
+      "RestSharp/106.12.0": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/RestSharp.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/RestSharp.dll": {}
+        }
+      },
       "Serilog/2.10.0": {
         "type": "package",
         "compile": {
@@ -163,6 +172,22 @@
         "quickbookssharp.nuspec"
       ]
     },
+    "RestSharp/106.12.0": {
+      "sha512": "irOsQHe5nTJB0BKxGQnTX1dsgCPl5dLTxvL7gbl98JiFPiHMN4wpFyUG/66ZpaFCsIrPKh6XwozWXlwYe9JwYQ==",
+      "type": "package",
+      "path": "restsharp/106.12.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net452/RestSharp.dll",
+        "lib/net452/RestSharp.xml",
+        "lib/netstandard2.0/RestSharp.dll",
+        "lib/netstandard2.0/RestSharp.xml",
+        "restsharp.106.12.0.nupkg.sha512",
+        "restsharp.nuspec",
+        "restsharp.png"
+      ]
+    },
     "Serilog/2.10.0": {
       "sha512": "+QX0hmf37a0/OZLxM3wL7V6/ADvC1XihXN4Kq/p6d8lCPfgkRdiuhbWlMaFjR9Av0dy5F0+MBeDmDdRZN/YwQA==",
       "type": "package",
@@ -256,6 +281,7 @@
     ".NETCoreApp,Version=v3.1": [
       "Newtonsoft.Json >= 13.0.1",
       "QuickBooksSharp >= 1.6.0",
+      "RestSharp >= 106.12.0",
       "Serilog >= 2.10.0",
       "Serilog.Sinks.Console >= 4.0.0"
     ]
@@ -309,6 +335,10 @@
           "QuickBooksSharp": {
             "target": "Package",
             "version": "[1.6.0, )"
+          },
+          "RestSharp": {
+            "target": "Package",
+            "version": "[106.12.0, )"
           },
           "Serilog": {
             "target": "Package",

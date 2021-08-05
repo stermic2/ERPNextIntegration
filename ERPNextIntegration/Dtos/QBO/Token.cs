@@ -1,7 +1,6 @@
 using System;
-using System.Security.Cryptography;
 
-namespace ERPNextIntegration.QBO
+namespace ERPNextIntegration.Dtos.QBO
 {
     public class Token
     {

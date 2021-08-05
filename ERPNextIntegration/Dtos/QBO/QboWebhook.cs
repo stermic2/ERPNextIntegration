@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 
-namespace ERPNextIntegration.Dtos.Webhooks
+namespace ERPNextIntegration.Dtos.QBO
 {
-    public class QboDto
+    public class QboWebhook
     {
         public IEnumerable<eventNotification> eventNotifications { get; set; }
     }

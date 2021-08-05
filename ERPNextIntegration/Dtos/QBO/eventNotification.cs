@@ -1,6 +1,4 @@
-using ERPNextIntegration.Dtos.Webhooks.QBO;
-
-namespace ERPNextIntegration.Dtos.Webhooks
+namespace ERPNextIntegration.Dtos.QBO
 {
     public class eventNotification
     {

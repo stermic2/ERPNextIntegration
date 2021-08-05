@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -20,6 +16,7 @@ namespace ERPNextIntegration
             Configuration = configuration;
             Environment = environment;
             Quickbooks.InitializeQuickbooksClient(configuration);
+            ErpNext.InitializeErpClient(configuration);
         }
         public void ConfigureServices(IServiceCollection services)
         {

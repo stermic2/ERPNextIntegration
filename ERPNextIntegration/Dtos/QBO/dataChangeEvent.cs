@@ -1,7 +1,6 @@
-using System.Collections;
 using System.Collections.Generic;
 
-namespace ERPNextIntegration.Dtos.Webhooks.QBO
+namespace ERPNextIntegration.Dtos.QBO
 {
     public class dataChangeEvent
     {
