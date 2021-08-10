@@ -17,9 +17,9 @@ namespace ERPNextIntegration.Dtos.QBO
                 {
                     name = invoice.Id,
                     owner = "mikie@timelabs.com",
-                    creation = invoice.MetaData?.CreateTime,
-                    modified = invoice.MetaData?.LastUpdatedTime,
-                    modified_by = invoice.MetaData?.LastModifiedByRef?.name,
+                    //creation = invoice.MetaData?.CreateTime,
+                    //modified = invoice.MetaData?.LastUpdatedTime,
+                    //modified_by = invoice.MetaData?.LastModifiedByRef?.name,
                     //idx = null,
                     docstatus = 0, //enum?
                     title = invoice.CustomerRef?.value + "-" + invoice.Id,
@@ -32,9 +32,9 @@ namespace ERPNextIntegration.Dtos.QBO
                     is_debit_note = false,
                     update_billed_amount_in_sales_order = false,
                     company = "Time Laboratories",
-                    posting_date = invoice.MetaData?.CreateTime?.Date,
-                    posting_time = invoice.MetaData?.CreateTime?.TimeOfDay,
-                    due_date = invoice.DueDate,
+                    posting_date = invoice.MetaData?.CreateTime?.Date.ToString("yyyy-MM-dd"),
+                    posting_time = invoice.MetaData?.CreateTime?.TimeOfDay.ToString("h'h:'m'm:'s's'"),
+                    due_date = invoice.DueDate?.ToString("yyyy-MM-dd hh:mm:ss"),
                     po_no = "",
                     territory = "All Territories",
                     shipping_address_name = "",
@@ -98,20 +98,18 @@ namespace ERPNextIntegration.Dtos.QBO
                     total_commission = 0,
                     against_income_account = "Sales - TL",
                     doctype = "Sales Invoice",
-                    /*
-                    items = invoice.Line?.Select(x => new SalesInvoiceItem
+                    items = invoice.Line?
+                        .Where(x => x.Id != null)
+                        .Select(x => new SalesInvoiceItem
                     {
-                        name = x.Id,
-                        owner = "mikie@timelabs.com",
                         item_code = x.SalesItemLineDetail?.ItemRef?.value,
-                        item_name = x.SalesItemLineDetail?.ItemRef?.name,
                         qty = x.SalesItemLineDetail?.Qty
                     }),
                     taxes = invoice.TxnTaxDetail?.TaxLine?.Select(x => new SalesTaxesAndCharges
                     {
-                        name = x.Id,
                         owner = "mikie@timelabs.com",
-                        charge_type = "On Net Total",
+                        charge_type = SalesTaxAndChargesType.OnNetTotal,
+                        account_head = "ST 6% - TL",
                         rate = x.TaxLineDetail?.TaxPercent,
                         currency = "USD",
                         tax_amount = x.Amount,
@@ -122,9 +120,8 @@ namespace ERPNextIntegration.Dtos.QBO
                         doctype = "Sales Taxes and Charges"
                     }),
                     payment_schedule = null
-                    */
-                    }
-                };
+                }
+            };
         }
     }
 }

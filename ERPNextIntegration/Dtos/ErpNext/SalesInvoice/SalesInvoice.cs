@@ -22,9 +22,9 @@ namespace ERPNextIntegration.Dtos.ErpNext.SalesInvoice
         public bool is_debit_note { get; set;}
         public bool update_billed_amount_in_sales_order { get; set;}
         public string company { get; set;}
-        public DateTime? posting_date { get; set;}
-        public TimeSpan? posting_time { get; set;}
-        public DateTime? due_date { get; set;}
+        public string posting_date { get; set;}
+        public string posting_time { get; set;}
+        public string? due_date { get; set;}
         public string po_no { get; set;}
         public string territory { get; set;}
         public string shipping_address_name { get; set;}

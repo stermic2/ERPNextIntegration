@@ -2,7 +2,9 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using ERPNextIntegration.Dtos.QBO;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
 using QuickBooksSharp;
 
@@ -32,14 +34,14 @@ namespace ERPNextIntegration
                 serializer.Serialize(file, value);
             }
         }
-        public static void InitializeQuickbooksClient(IConfiguration configuration)
+        public static void InitializeQuickbooksClient(IConfiguration configuration, IWebHostEnvironment env)
         {
             _clientId = configuration.GetValue<string>("Authentication:ClientId");
             _clientSecret = configuration.GetValue<string>("Authentication:ClientSecret");
             long.TryParse(configuration.GetValue<string>("Authentication:realmId"), out _realmId);
             _authenticationService = new AuthenticationService();
             _tokensInMemory = TokensOnDisk;
-            DataService = new DataService(_tokensInMemory.AccessToken, _realmId, Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development");
+            DataService = new DataService(_tokensInMemory.AccessToken, _realmId, env.IsDevelopment());
         }
 
         public static async Task RefreshTokens()

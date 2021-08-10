@@ -31,4 +31,13 @@ namespace ERPNextIntegration.Dtos.ErpNext.SalesInvoice
         public string item_wise_tax_detail { get; set; }
         public string doctype { get; set; }
     }
+
+    public static class SalesTaxAndChargesType
+    {
+        public const string Actual = "Actual";
+        public const string OnNetTotal = "On Net Total";
+        public const string OnPreviousRowAmount = "On Previous Row Amount";
+        public const string OnPreviousRowTotal = "On Previous Row Total";
+        public const string OnItemQuantity = "On Item Quantity";
+    }
 }
