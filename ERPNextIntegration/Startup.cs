@@ -1,3 +1,4 @@
+using Autofac;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -26,6 +27,10 @@ namespace ERPNextIntegration
             IntegrationDbContext.ConnectionString = Configuration.GetConnectionString("IDb");
             services.AddDbContext<IntegrationDbContext>(options =>
                 options.UseNpgsql(IntegrationDbContext.ConnectionString));
+        }
+        public void ConfigureContainer(ContainerBuilder builder)
+        {
+            builder.RegisterModule<AutofacModule>();
         }
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {

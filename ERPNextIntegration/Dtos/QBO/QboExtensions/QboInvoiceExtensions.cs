@@ -1,12 +1,19 @@
 using System.Linq;
-using ERPNextIntegration.Dtos.ErpNext;
+using System.Threading;
+using System.Threading.Tasks;
+using DynamicCQ.Interfaces;
+using DynamicCQ.RequestEncapsulation;
+using DynamicCQ.Requests.Commands.AddCommand;
+using DynamicCQ.Requests.Commands.UpdateCommand;
+using DynamicCQ.Requests.Queries.FindQuery;
 using ERPNextIntegration.Dtos.ErpNext.SalesInvoice;
 using ERPNextIntegration.Dtos.ErpNext.Wrapper;
+using MediatR;
 using QuickBooksSharp.Entities;
 
-namespace ERPNextIntegration.Dtos.QBO
+namespace ERPNextIntegration.Dtos.QBO.QboExtensions
 {
-    public static class QboExtensions
+    public static class QboInvoiceExtensions
     {
         public static ErpRequest<SalesInvoice> ToErpNext(this Invoice invoice)
         {
@@ -24,7 +31,7 @@ namespace ERPNextIntegration.Dtos.QBO
                     docstatus = 0, //enum?
                     title = invoice.CustomerRef?.value + "-" + invoice.Id,
                     naming_series = "ACC-SINV-.YYYY.-",
-                    customer = invoice.CustomerRef?.name,
+                    customer = "Test Customer",//invoice.CustomerRef?.name,
                     customer_name = invoice.CurrencyRef?.name,
                     is_pos = false,
                     is_consolidated = false,
@@ -102,13 +109,14 @@ namespace ERPNextIntegration.Dtos.QBO
                         .Where(x => x.Id != null)
                         .Select(x => new SalesInvoiceItem
                     {
-                        item_code = x.SalesItemLineDetail?.ItemRef?.value,
+                        item_code = "MTBAH",//x.SalesItemLineDetail?.ItemRef?.value,
                         qty = x.SalesItemLineDetail?.Qty
                     }),
                     taxes = invoice.TxnTaxDetail?.TaxLine?.Select(x => new SalesTaxesAndCharges
                     {
                         owner = "mikie@timelabs.com",
                         charge_type = SalesTaxAndChargesType.OnNetTotal,
+                        description = x.Description,
                         account_head = "ST 6% - TL",
                         rate = x.TaxLineDetail?.TaxPercent,
                         currency = "USD",

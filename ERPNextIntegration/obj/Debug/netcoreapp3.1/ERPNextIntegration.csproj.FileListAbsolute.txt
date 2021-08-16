@@ -45,3 +45,12 @@ C:\Code\ERPNextIntegration\ERPNextIntegration\bin\Debug\netcoreapp3.1\System.Com
 C:\Code\ERPNextIntegration\ERPNextIntegration\bin\Debug\netcoreapp3.1\System.Diagnostics.DiagnosticSource.dll
 C:\Code\ERPNextIntegration\ERPNextIntegration\bin\Debug\netcoreapp3.1\Humanizer.dll
 C:\Code\ERPNextIntegration\ERPNextIntegration\bin\Debug\netcoreapp3.1\Microsoft.EntityFrameworkCore.Design.dll
+C:\Code\ERPNextIntegration\ERPNextIntegration\bin\Debug\netcoreapp3.1\Autofac.dll
+C:\Code\ERPNextIntegration\ERPNextIntegration\bin\Debug\netcoreapp3.1\AutoMapper.dll
+C:\Code\ERPNextIntegration\ERPNextIntegration\bin\Debug\netcoreapp3.1\AutoMapper.Collection.dll
+C:\Code\ERPNextIntegration\ERPNextIntegration\bin\Debug\netcoreapp3.1\DynamicCQ.dll
+C:\Code\ERPNextIntegration\ERPNextIntegration\bin\Debug\netcoreapp3.1\MediatR.dll
+C:\Code\ERPNextIntegration\ERPNextIntegration\bin\Debug\netcoreapp3.1\Microsoft.DotNet.PlatformAbstractions.dll
+C:\Code\ERPNextIntegration\ERPNextIntegration\bin\Debug\netcoreapp3.1\Microsoft.Extensions.DependencyModel.dll
+C:\Code\ERPNextIntegration\ERPNextIntegration\obj\Debug\netcoreapp3.1\ERPNextIntegration.MvcApplicationPartsAssemblyInfo.cs
+C:\Code\ERPNextIntegration\ERPNextIntegration\bin\Debug\netcoreapp3.1\Autofac.Extensions.DependencyInjection.dll
