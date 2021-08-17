@@ -39,6 +39,19 @@ namespace ERPNextIntegration.Migrations
                     b.ToTable("FailedQboWebhooks");
                 });
 
+            modelBuilder.Entity("ERPNextIntegration.IntegrationRelationships.ItemRelationship", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.Property<string>("name")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ItemRelationships");
+                });
+
             modelBuilder.Entity("ERPNextIntegration.IntegrationRelationships.SalesInvoice", b =>
                 {
                     b.Property<string>("Id")

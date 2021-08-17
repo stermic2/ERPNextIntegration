@@ -11,6 +11,7 @@ namespace ERPNextIntegration
         
         public DbSet<entity> FailedQboWebhooks { get; set; }
         public DbSet<SalesInvoice> SalesInvoices { get; set; }
+        public DbSet<ItemRelationship> ItemRelationships { get; set; }
 
         public IntegrationDbContext(DbContextOptions<IntegrationDbContext> options, IHttpContextAccessor accessor) :
             base(options)

@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace ERPNextIntegration.Dtos.ErpNext.Item
 {
     public class ErpItem
@@ -8,15 +10,15 @@ namespace ERPNextIntegration.Dtos.ErpNext.Item
         public string modified { get; set; }
         public string modified_by { get; set; }
         public string idx { get; set; }
-        public string docstatus { get; set; }
+        public int? docstatus { get; set; }
         public string company { get; set; }
         public string naming_series { get; set; }
         public string item_code { get; set; }
         public string item_name { get; set; }
         public string item_group { get; set; }
-        public string is_item_from_hub { get; set; }
+        public bool is_item_from_hub { get; set; }
         public string stock_uom { get; set; }
-        public string disabled { get; set; }
+        public bool? disabled { get; set; }
         public string allow_alternative_item { get; set; }
         public string is_stock_item { get; set; }
         public string include_item_in_manufacturing { get; set; }
@@ -67,5 +69,7 @@ namespace ERPNextIntegration.Dtos.ErpNext.Item
         public string publish_in_hub { get; set; }
         public string synced_with_hub { get; set; }
         public string doctype { get; set; }
+        public ICollection<UnitOfMeasurement> uoms { get; set; }
+        public ICollection<item_defaults> item_defaults { get; set; }
     }
 }

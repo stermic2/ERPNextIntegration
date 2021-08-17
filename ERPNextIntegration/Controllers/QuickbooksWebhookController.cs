@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -13,6 +14,7 @@ using ERPNextIntegration.Dtos.QBO.QboExtensions;
 using ERPNextIntegration.IntegrationRelationships;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using QuickBooksSharp;
 using QuickBooksSharp.Entities;
@@ -56,7 +58,7 @@ namespace ERPNextIntegration.Controllers
                             await SendConvertedEntityToErpNext<SalesInvoice>("Sales%20Invoice", entity, (await Quickbooks.DataService.GetAsync<Invoice>(entity.Id)).Response!.ToErpNext());
                             break;
                         case "Item":
-                            await SendConvertedEntityToErpNext<SalesInvoice>("Item", entity, (await Quickbooks.DataService.GetAsync<Item>(entity.Id)).Response!.ToErpItem());
+                            await SendConvertedEntityToErpNext<ItemRelationship>("Item", entity, (await Quickbooks.DataService.GetAsync<Item>(entity.Id)).Response!.ToErpItem());
                             break;
                     }
         }
