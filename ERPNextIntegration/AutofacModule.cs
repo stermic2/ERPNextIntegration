@@ -17,6 +17,8 @@ namespace ERPNextIntegration
                 cfg.AddCollectionMappers();
                 cfg.AddMaps(typeof(AutofacModule).Assembly);
                 builder.GenericallyRegisterAnEntityToDto<IntegrationDbContext, SalesInvoice, SalesInvoice>(cfg);
+                builder.GenericallyRegisterAnEntityToDto<IntegrationDbContext, ItemRelationship, ItemRelationship>(cfg);
+                builder.GenericallyRegisterAnEntityToDto<IntegrationDbContext, entity, entity>(cfg);
             });
             builder.Register(c =>
                 {

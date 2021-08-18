@@ -9,5 +9,6 @@ namespace ERPNextIntegration.Dtos.QBO
         public string name { get; set; }
         public string operation { get; set; }
         public DateTime lastUpdated { get; set; }
+        public string errorContent { get; set; }
     }
 }
