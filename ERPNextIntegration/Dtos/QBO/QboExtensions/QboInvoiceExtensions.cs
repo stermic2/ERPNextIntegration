@@ -15,7 +15,7 @@ namespace ERPNextIntegration.Dtos.QBO.QboExtensions
 {
     public static class QboInvoiceExtensions
     {
-        public static ErpRequest<SalesInvoice> ToErpNext(this Invoice invoice)
+        public static ErpRequest<SalesInvoice> ToErpInvoice(this Invoice invoice)
         {
             var baseTotal = invoice.Line?.Select(x => x.Amount).Sum();
             return new ErpRequest<SalesInvoice>

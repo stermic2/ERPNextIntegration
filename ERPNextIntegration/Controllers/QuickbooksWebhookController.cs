@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -57,15 +58,36 @@ namespace ERPNextIntegration.Controllers
             List<IRestResponse> responses = new List<IRestResponse>();
             foreach (var notification in webhook.eventNotifications)
                 foreach (var entity in notification.dataChangeEvent.entities)
+                {
+                    List<IRestResponse> responsesForThisEntity = new List<IRestResponse>();
                     switch (entity.name)
                     {
                         case "Invoice":
-                            responses.Add(await SendConvertedEntityToErpNext<SalesInvoice>("Sales%20Invoice", entity, (await Quickbooks.DataService.GetAsync<Invoice>(entity.Id)).Response!.ToErpNext()));
+                            responsesForThisEntity.Add(await SendConvertedEntityToErpNext<SalesInvoice>("Sales%20Invoice", entity, 
+                                (await Quickbooks.DataService.GetAsync<Invoice>(entity.Id)).Response!.ToErpInvoice()));
                             break;
                         case "Item":
-                            responses.Add(await SendConvertedEntityToErpNext<ItemRelationship>("Item", entity, (await Quickbooks.DataService.GetAsync<Item>(entity.Id)).Response!.ToErpItem()));
+                            responsesForThisEntity.Add(await SendConvertedEntityToErpNext<ItemRelationship>("Item", entity, 
+                                (await Quickbooks.DataService.GetAsync<Item>(entity.Id)).Response!.ToErpItem()));
+                            break;
+                        case "Customer":
+                            var customer = (await Quickbooks.DataService.GetAsync<Customer>(entity.Id)).Response!;
+                            responsesForThisEntity.Add(await SendConvertedEntityToErpNext<CustomerRelationship>("Customer", entity, customer.ToErpCustomer()));
+                            if(customer?.BillAddr != null && responsesForThisEntity.Any(x => x.IsSuccessful))
+                                responsesForThisEntity.Add(await SendConvertedEntityToErpNext<CustomerAddressRelationship>("Address", entity, customer.ToErpBillingAddress()));
+                            if(customer?.ShipAddr != null && responsesForThisEntity.Any(x => x.IsSuccessful))
+                                responsesForThisEntity.Add(await SendConvertedEntityToErpNext<CustomerAddressRelationship>("Address", entity, customer.ToErpShippingAddress()));
                             break;
                     }
+                    foreach (var response in responsesForThisEntity)
+                    {
+                        entity.errorContent += response.Content;
+                        if (!(response is {IsSuccessful: true}))
+                            await Dispatcher.AddOrUpdate(entity);
+                        //else await Dispatcher.Send(new RemoveCommand<entity>(entity.Id));
+                    }
+                    responses.AddRange(responsesForThisEntity);
+                }
             return responses;
         }
 
@@ -73,7 +95,7 @@ namespace ERPNextIntegration.Controllers
         where TIntegrationRelationship : class, IIntegrationRelationship, new()
         {
             var relationshipInIntegrationDatabase = (await Dispatcher.Send(new FindQuery<TIntegrationRelationship>(entity.Id))).Records.FirstOrDefault();
-            var erpResponse = await SendRequest(endpoint, entity, qboResponse, relationshipInIntegrationDatabase?.name);
+            var erpResponse = SendRequest(endpoint, entity, qboResponse, relationshipInIntegrationDatabase?.name);
             dynamic erpResponseContent = JObject.Parse(erpResponse.Content);
             if (erpResponse.IsSuccessful) {
                 var newRelationship = new TIntegrationRelationship {Id = entity.Id, name = erpResponseContent.data.name};
@@ -82,8 +104,9 @@ namespace ERPNextIntegration.Controllers
             return erpResponse;
         }
 
-        private async Task<IRestResponse> SendRequest(string endpoint, entity entity, object requestBody, string name)
+        private IRestResponse SendRequest(string endpoint, entity entity, object requestBody, string name)
         {
+            name = name?.Replace(" ", "%20");
             IRestResponse erpResponse = null;
             switch (entity.operation)
             {
@@ -92,15 +115,13 @@ namespace ERPNextIntegration.Controllers
                     break;
                 case "Update":
                     erpResponse = ErpNext.Client.Put(new RestRequest(endpoint + "/" + name).AddJsonBody(requestBody));
+                    if (erpResponse.Content.Contains("DoesNotExistError") || erpResponse.Content == "{}")
+                        erpResponse = ErpNext.Client.Post(new RestRequest(endpoint).AddJsonBody(requestBody));
                     break;
                 case "Delete":
                     erpResponse = ErpNext.Client.Delete(new RestRequest(endpoint + "/" + name));
                     break;
             }
-            entity.errorContent = erpResponse?.Content;
-            if (!(erpResponse is {IsSuccessful: true}))
-                await Dispatcher.AddOrUpdate(entity);
-            else await Dispatcher.Send(new RemoveCommand<entity>(entity.Id));
             return erpResponse;
         }
     }
