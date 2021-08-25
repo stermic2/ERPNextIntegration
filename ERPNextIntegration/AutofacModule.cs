@@ -16,10 +16,11 @@ namespace ERPNextIntegration
             {
                 cfg.AddCollectionMappers();
                 cfg.AddMaps(typeof(AutofacModule).Assembly);
-                builder.GenericallyRegisterAnEntityToDto<IntegrationDbContext, SalesInvoice, SalesInvoice>(cfg);
+                builder.GenericallyRegisterAnEntityToDto<IntegrationDbContext, SalesInvoiceRelationship, SalesInvoiceRelationship>(cfg);
                 builder.GenericallyRegisterAnEntityToDto<IntegrationDbContext, ItemRelationship, ItemRelationship>(cfg);
                 builder.GenericallyRegisterAnEntityToDto<IntegrationDbContext, CustomerRelationship, CustomerRelationship>(cfg);
                 builder.GenericallyRegisterAnEntityToDto<IntegrationDbContext, CustomerAddressRelationship, CustomerAddressRelationship>(cfg);
+                builder.GenericallyRegisterAnEntityToDto<IntegrationDbContext, PaymentEntryRelationship, PaymentEntryRelationship>(cfg);
                 builder.GenericallyRegisterAnEntityToDto<IntegrationDbContext, entity, entity>(cfg);
             });
             builder.Register(c =>

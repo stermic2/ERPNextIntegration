@@ -63,7 +63,7 @@ namespace ERPNextIntegration.Controllers
                     switch (entity.name)
                     {
                         case "Invoice":
-                            responsesForThisEntity.Add(await SendConvertedEntityToErpNext<SalesInvoice>("Sales%20Invoice", entity, 
+                            responsesForThisEntity.Add(await SendConvertedEntityToErpNext<SalesInvoiceRelationship>("Sales%20Invoice", entity, 
                                 (await Quickbooks.DataService.GetAsync<Invoice>(entity.Id)).Response!.ToErpInvoice()));
                             break;
                         case "Item":
@@ -77,6 +77,10 @@ namespace ERPNextIntegration.Controllers
                                 responsesForThisEntity.Add(await SendConvertedEntityToErpNext<CustomerAddressRelationship>("Address", entity, customer.ToErpBillingAddress()));
                             if(customer?.ShipAddr != null && responsesForThisEntity.Any(x => x.IsSuccessful))
                                 responsesForThisEntity.Add(await SendConvertedEntityToErpNext<CustomerAddressRelationship>("Address", entity, customer.ToErpShippingAddress()));
+                            break;
+                        case "Payment":
+                            responsesForThisEntity.Add(await SendConvertedEntityToErpNext<SalesInvoiceRelationship>("Payment%20Entry", entity, 
+                                (await Quickbooks.DataService.GetAsync<Payment>(entity.Id)).Response!.ToErpPaymentEntry(Dispatcher)));
                             break;
                     }
                     foreach (var response in responsesForThisEntity)
