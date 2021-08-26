@@ -13,12 +13,8 @@ namespace ERPNextIntegration.Dtos.QBO.QboExtensions
 {
     public static class QboPaymentExtensions
     {
-        public static async Task<ErpPaymentEntry> ToErpPaymentEntry(this Payment payment, IMediator dispatcher)
+        public static ErpPaymentEntry ToErpPaymentEntry(this Payment payment, IEnumerable<SalesInvoiceRelationship> relatedInvoices)
         {
-            IEnumerable<Task<SalesInvoiceRelationship>> relatedSalesInvoicesQueries =
-                payment.Line?.FirstOrDefault()?.LinkedTxn?.Select(async x =>
-                    (await dispatcher.Send(new FindQuery<SalesInvoiceRelationship>(x.TxnId))).Records.FirstOrDefault());
-            IEnumerable<SalesInvoiceRelationship> relatedSalesInvoices = await Task.WhenAll(relatedSalesInvoicesQueries);
             // To Do: When no relatedSalesInvoices are found throw a more specific error than null reference
             return new ErpPaymentEntry
             {
@@ -68,7 +64,7 @@ namespace ERPNextIntegration.Dtos.QBO.QboExtensions
                 //remarks = null,
                 title = payment.CustomerRef?.name,
                 doctype = "Payment Entry",
-                references = relatedSalesInvoices.Select(x => new InvoiceReference
+                references = relatedInvoices.Select(x => new InvoiceReference
                 {
                     //name = null,
                     //owner = null,

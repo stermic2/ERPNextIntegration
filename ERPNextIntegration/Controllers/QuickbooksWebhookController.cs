@@ -79,8 +79,13 @@ namespace ERPNextIntegration.Controllers
                                 responsesForThisEntity.Add(await SendConvertedEntityToErpNext<CustomerAddressRelationship>("Address", entity, customer.ToErpShippingAddress()));
                             break;
                         case "Payment":
-                            responsesForThisEntity.Add(await SendConvertedEntityToErpNext<SalesInvoiceRelationship>("Payment%20Entry", entity, 
-                                (await Quickbooks.DataService.GetAsync<Payment>(entity.Id)).Response!.ToErpPaymentEntry(Dispatcher)));
+                            var relatedInvoices = (await Quickbooks.DataService.GetAsync<Payment>(entity.Id)).Response!;
+                            IEnumerable<Task<SalesInvoiceRelationship>> relatedSalesInvoicesQueries =
+                                relatedInvoices?.Line?.FirstOrDefault()?.LinkedTxn?.Select(async x =>
+                                    (await Dispatcher.Send(new FindQuery<SalesInvoiceRelationship>(x.TxnId))).Records.FirstOrDefault());
+                            IEnumerable<SalesInvoiceRelationship> relatedSalesInvoices = await Task.WhenAll(relatedSalesInvoicesQueries);
+                            responsesForThisEntity.Add(
+                                await SendConvertedEntityToErpNext<SalesInvoiceRelationship>("Payment%20Entry", entity, relatedInvoices.ToErpPaymentEntry(relatedSalesInvoices)));
                             break;
                     }
                     foreach (var response in responsesForThisEntity)
