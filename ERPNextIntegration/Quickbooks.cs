@@ -22,6 +22,8 @@ namespace ERPNextIntegration
         {
             get
             {
+                if (!File.Exists(Directory.GetCurrentDirectory() + @"\tokens.txt"))
+                    return new Token();
                 using var r = new StreamReader(Directory.GetCurrentDirectory() + @"\tokens.txt");
                 var json = r.ReadToEnd();
                 var tokenFile = JsonConvert.DeserializeObject<Token>(json);

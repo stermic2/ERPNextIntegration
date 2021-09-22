@@ -21,6 +21,7 @@ namespace ERPNextIntegration
                 builder.GenericallyRegisterAnEntityToDto<IntegrationDbContext, CustomerRelationship, CustomerRelationship>(cfg);
                 builder.GenericallyRegisterAnEntityToDto<IntegrationDbContext, CustomerAddressRelationship, CustomerAddressRelationship>(cfg);
                 builder.GenericallyRegisterAnEntityToDto<IntegrationDbContext, PaymentEntryRelationship, PaymentEntryRelationship>(cfg);
+                builder.GenericallyRegisterAnEntityToDto<IntegrationDbContext, SupplierRelationship, SupplierRelationship>(cfg);
                 builder.GenericallyRegisterAnEntityToDto<IntegrationDbContext, entity, entity>(cfg);
             });
             builder.Register(c =>

@@ -106,6 +106,19 @@ namespace ERPNextIntegration.Migrations
 
                     b.ToTable("SalesInvoices");
                 });
+
+            modelBuilder.Entity("ERPNextIntegration.IntegrationRelationships.SupplierRelationship", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.Property<string>("name")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SupplierRelationships");
+                });
 #pragma warning restore 612, 618
         }
     }

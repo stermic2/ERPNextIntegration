@@ -17,31 +17,42 @@ namespace ERPNextIntegration.Dtos.QBO.QboExtensions
     {
         public static ErpRequest<SalesInvoice> ToErpInvoice(this Invoice invoice)
         {
-            var baseTotal = invoice.Line?.Select(x => x.Amount).Sum();
+            var salesInvoice = invoice.ToErpInvoiceFromSalesTransaction();
+            salesInvoice.data.status = invoice.invoiceStatus;
+            return salesInvoice;
+        }
+        public static ErpRequest<SalesInvoice> ToErpInvoice(this SalesReceipt salesReceipt)
+        {
+            var salesInvoice = salesReceipt.ToErpInvoiceFromSalesTransaction();
+            return salesInvoice;
+        }
+        public static ErpRequest<SalesInvoice> ToErpInvoiceFromSalesTransaction(this SalesTransaction salesTransaction)
+        {
+            var baseTotal = salesTransaction.Line?.Select(x => x.Amount).Sum();
             return new ErpRequest<SalesInvoice>
             {
                 data = new SalesInvoice
                 {
-                    name = invoice.Id,
+                    name = salesTransaction.Id,
                     owner = "mikie@timelabs.com",
                     //creation = invoice.MetaData?.CreateTime,
                     //modified = invoice.MetaData?.LastUpdatedTime,
                     //modified_by = invoice.MetaData?.LastModifiedByRef?.name,
                     //idx = null,
                     docstatus = 0, //enum?
-                    title = invoice.CustomerRef?.value + "-" + invoice.Id,
+                    title = salesTransaction.CustomerRef?.value + "-" + salesTransaction.Id,
                     naming_series = "ACC-SINV-.YYYY.-",
                     customer = "Test Customer",//invoice.CustomerRef?.name,
-                    customer_name = invoice.CurrencyRef?.name,
+                    customer_name = salesTransaction.CurrencyRef?.name,
                     is_pos = false,
                     is_consolidated = false,
                     is_return = false,
                     is_debit_note = false,
                     update_billed_amount_in_sales_order = false,
                     company = "Time Laboratories",
-                    posting_date = invoice.MetaData?.CreateTime?.Date.ToString("yyyy-MM-dd"),
-                    posting_time = invoice.MetaData?.CreateTime?.TimeOfDay.ToString("h'h:'m'm:'s's'"),
-                    due_date = invoice.DueDate?.ToString("yyyy-MM-dd hh:mm:ss"),
+                    posting_date = salesTransaction.MetaData?.CreateTime?.Date.ToString("yyyy-MM-dd"),
+                    posting_time = salesTransaction.MetaData?.CreateTime?.TimeOfDay.ToString("h'h:'m'm:'s's'"),
+                    due_date = salesTransaction.DueDate?.ToString("yyyy-MM-dd hh:mm:ss"),
                     po_no = "",
                     territory = "All Territories",
                     shipping_address_name = "",
@@ -53,7 +64,7 @@ namespace ERPNextIntegration.Dtos.QBO.QboExtensions
                     ignore_pricing_rule = false,
                     update_stock = false,
                     total_billing_amount = 0,
-                    total_qty = invoice.Line?.Select(x => x.SalesItemLineDetail?.Qty).Sum(),
+                    total_qty = salesTransaction.Line?.Select(x => x.SalesItemLineDetail?.Qty).Sum(),
                     base_total = baseTotal,
                     base_net_total = baseTotal,
                     //total_net_weight = null,
@@ -62,29 +73,29 @@ namespace ERPNextIntegration.Dtos.QBO.QboExtensions
                     exempt_from_sales_tax = false,
                     tax_category = "",
                     //other_charges_calculation = null,
-                    base_total_taxes_and_charges = invoice.TxnTaxDetail?.TotalTax,
-                    total_taxes_and_charges = invoice.TxnTaxDetail?.TotalTax,
+                    base_total_taxes_and_charges = salesTransaction.TxnTaxDetail?.TotalTax,
+                    total_taxes_and_charges = salesTransaction.TxnTaxDetail?.TotalTax,
                     loyalty_points = 0,
                     loyalty_amount = 0,
                     redeem_loyalty_points = false,
-                    apply_discount_on = invoice.ApplyTaxAfterDiscount != null && (bool) invoice.ApplyTaxAfterDiscount ? "Grand Total" : "",
-                    base_discount_amount = invoice.DiscountAmt,
-                    additional_discount_percentage = invoice.DiscountRate,
-                    discount_amount = invoice.DiscountAmt,
-                    base_grand_total = baseTotal + invoice.TxnTaxDetail?.TotalTax,
+                    apply_discount_on = salesTransaction.ApplyTaxAfterDiscount != null && (bool) salesTransaction.ApplyTaxAfterDiscount ? "Grand Total" : "",
+                    base_discount_amount = salesTransaction.DiscountAmt,
+                    additional_discount_percentage = salesTransaction.DiscountRate,
+                    discount_amount = salesTransaction.DiscountAmt,
+                    base_grand_total = baseTotal + salesTransaction.TxnTaxDetail?.TotalTax,
                     base_rounding_adjustment = 0,
-                    base_rounded_total = baseTotal + invoice.TxnTaxDetail?.TotalTax,
+                    base_rounded_total = baseTotal + salesTransaction.TxnTaxDetail?.TotalTax,
                     //base_in_words = null,
-                    grand_total = invoice.TotalAmt,
+                    grand_total = salesTransaction.TotalAmt,
                     rounding_adjustment = 0,
-                    rounded_total = invoice.TotalAmt,
+                    rounded_total = salesTransaction.TotalAmt,
                     //in_words = null,
                     //total_advance = null,
-                    outstanding_amount = invoice.TotalAmt - invoice.Balance,
+                    outstanding_amount = salesTransaction.TotalAmt - salesTransaction.Balance,
                     disable_rounded_total = false,
                     allocate_advances_automatically = false,
-                    base_paid_amount = invoice.Balance - invoice.TxnTaxDetail?.TotalTax,
-                    paid_amount = invoice.Balance,
+                    base_paid_amount = salesTransaction.Balance - salesTransaction.TxnTaxDetail?.TotalTax,
+                    paid_amount = salesTransaction.Balance,
                     //base_change_amount = null,
                     //change_amount = null,
                     //write_off_amount = null,
@@ -95,7 +106,7 @@ namespace ERPNextIntegration.Dtos.QBO.QboExtensions
                     is_internal_customer = false,
                     customer_group = "All Customer Groups",
                     is_discounted = false,
-                    status = invoice.invoiceStatus,
+                    //status = "",
                     debit_to = "Debtors - TL",
                     party_account_currency = "USD",
                     is_opening = "No",
@@ -105,14 +116,14 @@ namespace ERPNextIntegration.Dtos.QBO.QboExtensions
                     total_commission = 0,
                     against_income_account = "Sales - TL",
                     doctype = "Sales Invoice",
-                    items = invoice.Line?
+                    items = salesTransaction.Line?
                         .Where(x => x.Id != null)
                         .Select(x => new SalesInvoiceItem
                     {
                         item_code = "MTBAH",//x.SalesItemLineDetail?.ItemRef?.value,
                         qty = x.SalesItemLineDetail?.Qty
                     }),
-                    taxes = invoice.TxnTaxDetail?.TaxLine?.Select(x => new SalesTaxesAndCharges
+                    taxes = salesTransaction.TxnTaxDetail?.TaxLine?.Select(x => new SalesTaxesAndCharges
                     {
                         owner = "mikie@timelabs.com",
                         charge_type = SalesTaxAndChargesType.OnNetTotal,
@@ -121,10 +132,10 @@ namespace ERPNextIntegration.Dtos.QBO.QboExtensions
                         rate = x.TaxLineDetail?.TaxPercent,
                         currency = "USD",
                         tax_amount = x.Amount,
-                        total = invoice.TotalAmt,
-                        tax_amount_after_discount_amount = invoice.TxnTaxDetail?.TotalTax,
+                        total = salesTransaction.TotalAmt,
+                        tax_amount_after_discount_amount = salesTransaction.TxnTaxDetail?.TotalTax,
                         base_tax_amount = x.Amount,
-                        base_total = invoice.TotalAmt,
+                        base_total = salesTransaction.TotalAmt,
                         doctype = "Sales Taxes and Charges"
                     }),
                     payment_schedule = null

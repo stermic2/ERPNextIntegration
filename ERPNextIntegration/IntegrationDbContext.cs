@@ -15,6 +15,7 @@ namespace ERPNextIntegration
         public DbSet<CustomerRelationship> CustomerRelationships { get; set; }
         public DbSet<CustomerAddressRelationship> CustomerAddressRelationships { get; set; }
         public DbSet<PaymentEntryRelationship> PaymentEntryRelationships { get; set; }
+        public DbSet<SupplierRelationship> SupplierRelationships { get; set; }
 
         public IntegrationDbContext(DbContextOptions<IntegrationDbContext> options, IHttpContextAccessor accessor) :
             base(options)

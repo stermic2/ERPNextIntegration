@@ -9,6 +9,7 @@ using DynamicCQ.Requests.Commands.AddCommand;
 using DynamicCQ.Requests.Commands.RemoveCommand;
 using DynamicCQ.Requests.Commands.UpdateCommand;
 using DynamicCQ.Requests.Queries.FindQuery;
+using DynamicCQ.Requests.Queries.HandlerHelpers.Exceptions;
 using DynamicCQ.Requests.RequestPipelines;
 using ERPNextIntegration.Dtos.ErpNext.Wrapper;
 using ERPNextIntegration.Dtos.QBO;
@@ -36,7 +37,7 @@ namespace ERPNextIntegration.Controllers
         public async Task<IActionResult> Post([FromBody] QboWebhook webhook)
         {
             ICollection<IRestResponse> responses;
-            await Quickbooks.RefreshTokens(); 
+            await Quickbooks.RefreshTokens();
             try
             {
                 responses = await ProcessWebhook(webhook);
@@ -46,7 +47,14 @@ namespace ERPNextIntegration.Controllers
                 if (!e.Message.Contains("statusCode=401"))
                     return NotFound(e.Message);
                 await Quickbooks.ForceRefresh();
-                responses = await ProcessWebhook(webhook);
+                try
+                {
+                    responses = await ProcessWebhook(webhook);
+                }
+                catch
+                {
+                    return Unauthorized(e.Message);
+                }
             }
             if (responses.Any(x => !x.IsSuccessful))
                 return BadRequest(responses.Select(x => x.Content));
@@ -66,6 +74,10 @@ namespace ERPNextIntegration.Controllers
                             responsesForThisEntity.Add(await SendConvertedEntityToErpNext<SalesInvoiceRelationship>("Sales%20Invoice", entity, 
                                 (await Quickbooks.DataService.GetAsync<Invoice>(entity.Id)).Response!.ToErpInvoice()));
                             break;
+                        case "Sales Receipt":
+                            responsesForThisEntity.Add(await SendConvertedEntityToErpNext<SalesInvoiceRelationship>("Sales%20Invoice", entity, 
+                                (await Quickbooks.DataService.GetAsync<SalesReceipt>(entity.Id)).Response!.ToErpInvoice()));
+                            break;
                         case "Item":
                             responsesForThisEntity.Add(await SendConvertedEntityToErpNext<ItemRelationship>("Item", entity, 
                                 (await Quickbooks.DataService.GetAsync<Item>(entity.Id)).Response!.ToErpItem()));
@@ -73,9 +85,9 @@ namespace ERPNextIntegration.Controllers
                         case "Customer":
                             var customer = (await Quickbooks.DataService.GetAsync<Customer>(entity.Id)).Response!;
                             responsesForThisEntity.Add(await SendConvertedEntityToErpNext<CustomerRelationship>("Customer", entity, customer.ToErpCustomer()));
-                            if(customer?.BillAddr != null && responsesForThisEntity.Any(x => x.IsSuccessful))
+                            if(customer?.BillAddr != null && responsesForThisEntity.Last().IsSuccessful)
                                 responsesForThisEntity.Add(await SendConvertedEntityToErpNext<CustomerAddressRelationship>("Address", entity, customer.ToErpBillingAddress()));
-                            if(customer?.ShipAddr != null && responsesForThisEntity.Any(x => x.IsSuccessful))
+                            if(customer?.ShipAddr != null && responsesForThisEntity.Last().IsSuccessful)
                                 responsesForThisEntity.Add(await SendConvertedEntityToErpNext<CustomerAddressRelationship>("Address", entity, customer.ToErpShippingAddress()));
                             break;
                         case "Payment":
@@ -83,10 +95,24 @@ namespace ERPNextIntegration.Controllers
                             IEnumerable<Task<SalesInvoiceRelationship>> relatedSalesInvoicesQueries =
                                 relatedInvoices?.Line?.FirstOrDefault()?.LinkedTxn?.Select(async x =>
                                     (await Dispatcher.Send(new FindQuery<SalesInvoiceRelationship>(x.TxnId))).Records.FirstOrDefault());
-                            IEnumerable<SalesInvoiceRelationship> relatedSalesInvoices = await Task.WhenAll(relatedSalesInvoicesQueries);
+                            IEnumerable<SalesInvoiceRelationship> relatedSalesInvoices = await Task.WhenAll(relatedSalesInvoicesQueries!);
                             responsesForThisEntity.Add(
-                                await SendConvertedEntityToErpNext<SalesInvoiceRelationship>("Payment%20Entry", entity, relatedInvoices.ToErpPaymentEntry(relatedSalesInvoices)));
+                                await SendConvertedEntityToErpNext<PaymentEntryRelationship>("Payment%20Entry", entity, relatedInvoices.ToErpPaymentEntry(relatedSalesInvoices)));
                             break;
+                        case "Purchase Order":
+                            //responsesForThisEntity.Add(await SendConvertedEntityToErpNext<SalesInvoiceRelationship>("Sales%20Invoice", entity, 
+                            //    (await Quickbooks.DataService.GetAsync<PurchaseOrder>(entity.Id)).Response!.ToErpInvoice()));
+                            break;
+                        case "Bill":
+                            //responsesForThisEntity.Add(await SendConvertedEntityToErpNext<SalesInvoiceRelationship>("Sales%20Invoice", entity, 
+                            //    (await Quickbooks.DataService.GetAsync<Bill>(entity.Id)).Response!.ToErpInvoice()));
+                            break;
+                        case "Vendor":
+                            responsesForThisEntity.Add(await SendConvertedEntityToErpNext<SupplierRelationship>("Supplier", entity, 
+                                (await Quickbooks.DataService.GetAsync<Vendor>(entity.Id)).Response!.ToErpSupplier()));
+                            break;
+                        default:
+                            throw new NotImplementedException();
                     }
                     foreach (var response in responsesForThisEntity)
                     {
@@ -104,32 +130,34 @@ namespace ERPNextIntegration.Controllers
         where TIntegrationRelationship : class, IIntegrationRelationship, new()
         {
             var relationshipInIntegrationDatabase = (await Dispatcher.Send(new FindQuery<TIntegrationRelationship>(entity.Id))).Records.FirstOrDefault();
-            var erpResponse = SendRequest(endpoint, entity, qboResponse, relationshipInIntegrationDatabase?.name);
-            dynamic erpResponseContent = JObject.Parse(erpResponse.Content);
-            if (erpResponse.IsSuccessful) {
-                var newRelationship = new TIntegrationRelationship {Id = entity.Id, name = erpResponseContent.data.name};
-                await Dispatcher.AddOrUpdate(newRelationship);
-            }
-            return erpResponse;
-        }
-
-        private IRestResponse SendRequest(string endpoint, entity entity, object requestBody, string name)
-        {
-            name = name?.Replace(" ", "%20");
+            if (relationshipInIntegrationDatabase != null)
+                relationshipInIntegrationDatabase.name = relationshipInIntegrationDatabase.name?.Replace(" ", "%20");
             IRestResponse erpResponse = null;
             switch (entity.operation)
             {
                 case "Create":
-                    erpResponse = ErpNext.Client.Post(new RestRequest(endpoint).AddJsonBody(requestBody));
+                    if (!string.IsNullOrEmpty(relationshipInIntegrationDatabase?.name))
+                    {
+                        erpResponse = ErpNext.Client.Get<TIntegrationRelationship>(new RestRequest(endpoint + "?filters=[[\"quickbooks_id\", \"=\", \"" + entity.Id + "\"]]"));
+                        //if (erpResponse.IsSuccessful) Latest edition
+                    }
+                    erpResponse = ErpNext.Client.Post(new RestRequest(endpoint).AddJsonBody(qboResponse));
                     break;
                 case "Update":
-                    erpResponse = ErpNext.Client.Put(new RestRequest(endpoint + "/" + name).AddJsonBody(requestBody));
-                    if (erpResponse.Content.Contains("DoesNotExistError") || erpResponse.Content == "{}")
-                        erpResponse = ErpNext.Client.Post(new RestRequest(endpoint).AddJsonBody(requestBody));
+                    if (string.IsNullOrEmpty(relationshipInIntegrationDatabase?.name))
+                        erpResponse = ErpNext.Client.Put(new RestRequest(endpoint + "/" + relationshipInIntegrationDatabase?.name)
+                            .AddJsonBody(qboResponse));
+                    //if (erpResponse.Content.Contains("DoesNotExistError") || erpResponse.Content == "{}")
+                    //erpResponse = ErpNext.Client.Post(new RestRequest(endpoint).AddJsonBody(requestBody));
                     break;
                 case "Delete":
-                    erpResponse = ErpNext.Client.Delete(new RestRequest(endpoint + "/" + name));
+                    erpResponse = ErpNext.Client.Delete(new RestRequest(endpoint + "/" + relationshipInIntegrationDatabase?.name));
                     break;
+            }
+            dynamic erpResponseContent = JObject.Parse(erpResponse.Content);
+            if (erpResponse.Content != "{}" && erpResponse.IsSuccessful) {
+                var newRelationship = new TIntegrationRelationship {Id = entity.Id, name = erpResponseContent.data.name};
+                await Dispatcher.AddOrUpdate(newRelationship);
             }
             return erpResponse;
         }

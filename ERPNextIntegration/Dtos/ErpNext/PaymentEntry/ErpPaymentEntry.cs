@@ -28,12 +28,12 @@ namespace ERPNextIntegration.Dtos.ErpNext.PaymentEntry
         public string paid_to { get; set; }
         public string paid_to_account_currency { get; set; }
         public string paid_to_account_balance { get; set; }
-        public string paid_amount { get; set; }
+        public decimal? paid_amount { get; set; }
         public decimal? paid_amount_after_tax { get; set; }
         public decimal? source_exchange_rate { get; set; }
         public string base_paid_amount { get; set; }
         public decimal? base_paid_amount_after_tax { get; set; }
-        public string received_amount { get; set; }
+        public decimal? received_amount { get; set; }
         public decimal? received_amount_after_tax { get; set; }
         public decimal? target_exchange_rate { get; set; }
         public string base_received_amount { get; set; }
