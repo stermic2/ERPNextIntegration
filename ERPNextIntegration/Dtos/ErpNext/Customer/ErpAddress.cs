@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace ERPNextIntegration.Dtos.ErpNext.Customer
 {
-    public class ErpAddress
+    public class ErpAddress : IErpNextDto
     {
         public string name { get; set; }
         public string owner { get; set; }

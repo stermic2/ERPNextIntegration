@@ -49,7 +49,15 @@ namespace ERPNextIntegration
         public static async Task RefreshTokens()
         {
             if (_tokensInMemory.LastAccessTokenRefresh < DateTime.Now.Subtract(TimeSpan.FromMinutes(59)))
-                await ForceRefresh();
+                try
+                {
+                    await ForceRefresh();
+                }
+                catch (QuickBooksException e)
+                {
+                    
+                    await ForceRefresh();
+                }
         }
 
         public static async Task ForceRefresh()

@@ -1,14 +1,17 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using ERPNextIntegration.Dtos.ErpNext;
 using ERPNextIntegration.Dtos.ErpNext.Customer;
+using ERPNextIntegration.Dtos.ErpNext.Wrapper;
 using QuickBooksSharp.Entities;
 namespace ERPNextIntegration.Dtos.QBO.QboExtensions
 {
     public static class QboCustomerExtensions
     {
-        public static ErpCustomer ToErpCustomer(this Customer customer)
+        public static IErpNextDto ToErpCustomer(this Customer customer)
         {
-            return new ErpCustomer
-            {
+            return new ErpCustomer{
                 name = customer.FullyQualifiedName,
                 //owner = null,
                 //creation = null,
@@ -38,7 +41,7 @@ namespace ERPNextIntegration.Dtos.QBO.QboExtensions
             };
         }
 
-        public static ErpAddress ToErpBillingAddress(this Customer customer)
+        public static IErpNextDto ToErpBillingAddress(this Customer customer)
         {
             var address = customer.ToErpAddress(customer.BillAddr);
             address.name = customer.FullyQualifiedName + "-Billing";
@@ -48,7 +51,7 @@ namespace ERPNextIntegration.Dtos.QBO.QboExtensions
             return address;
         }
         
-        public static ErpAddress ToErpShippingAddress(this Customer customer)
+        public static IErpNextDto ToErpShippingAddress(this Customer customer)
         {
             var address = customer.ToErpAddress(customer.ShipAddr);
             address.name = customer.FullyQualifiedName + "-Shipping";

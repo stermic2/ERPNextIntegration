@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DynamicCQ.Requests.Queries.FindQuery;
+using ERPNextIntegration.Dtos.ErpNext;
 using ERPNextIntegration.Dtos.ErpNext.PaymentEntry;
 using ERPNextIntegration.Dtos.ErpNext.SalesInvoice;
+using ERPNextIntegration.Dtos.ErpNext.Wrapper;
 using ERPNextIntegration.IntegrationRelationships;
 using MediatR;
 using QuickBooksSharp.Entities;
@@ -13,7 +15,7 @@ namespace ERPNextIntegration.Dtos.QBO.QboExtensions
 {
     public static class QboPaymentExtensions
     {
-        public static ErpPaymentEntry ToErpPaymentEntry(this Payment payment, IEnumerable<SalesInvoiceRelationship> relatedInvoices)
+        public static IErpNextDto ToErpPaymentEntry(this Payment payment, IEnumerable<SalesInvoiceRelationship> relatedInvoices)
         {
             // To Do: When no relatedSalesInvoices are found throw a more specific error than null reference
             return new ErpPaymentEntry

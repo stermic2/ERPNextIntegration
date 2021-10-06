@@ -1,6 +1,6 @@
 namespace ERPNextIntegration.Dtos.ErpNext.Customer
 {
-    public class ErpCustomer
+    public class ErpCustomer : IErpNextDto
     {
         public string name { get; set; }
         public string owner { get; set; }

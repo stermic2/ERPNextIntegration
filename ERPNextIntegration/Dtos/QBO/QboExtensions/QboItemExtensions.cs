@@ -1,16 +1,18 @@
 using System.Collections.Generic;
+using ERPNextIntegration.Dtos.ErpNext;
 using ERPNextIntegration.Dtos.ErpNext.Item;
+using ERPNextIntegration.Dtos.ErpNext.Wrapper;
 using QuickBooksSharp.Entities;
 
 namespace ERPNextIntegration.Dtos.QBO.QboExtensions
 {
     public static class QboItemExtensions
     {
-        public static ErpItem ToErpItem(this Item qboItem)
+        public static IErpNextDto ToErpItem(this Item qboItem)
         {
             return new ErpItem
             {
-                name = qboItem.Id,
+                //name = qboItem.Id,
                 owner = "mikie@timelabs.com",
                 //creation = null,
                 //modified = null,
@@ -75,6 +77,7 @@ namespace ERPNextIntegration.Dtos.QBO.QboExtensions
                 //publish_in_hub = null,
                 //synced_with_hub = null,
                 //doctype = null,
+                /*
                 uoms = new List<UnitOfMeasurement>
                 {
                     new UnitOfMeasurement
@@ -115,6 +118,7 @@ namespace ERPNextIntegration.Dtos.QBO.QboExtensions
                         doctype = "Item Default"
                     }
                 }
+                */
             };
         }
     }

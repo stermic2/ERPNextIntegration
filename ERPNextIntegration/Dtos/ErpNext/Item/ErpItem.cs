@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace ERPNextIntegration.Dtos.ErpNext.Item
 {
-    public class ErpItem
+    public class ErpItem : IErpNextDto
     {
         public string name { get; set; }
         public string owner { get; set; }

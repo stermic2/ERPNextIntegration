@@ -1,6 +1,6 @@
 namespace ERPNextIntegration.Dtos.ErpNext.Supplier
 {
-    public class ErpSupplier
+    public class ErpSupplier : IErpNextDto
     {
         public string name { get; set; }
         public string owner { get; set; }
