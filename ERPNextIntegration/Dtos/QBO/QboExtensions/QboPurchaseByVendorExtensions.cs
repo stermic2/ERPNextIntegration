@@ -12,6 +12,7 @@ namespace ERPNextIntegration.Dtos.QBO.QboExtensions
             return new ErpSupplier
             {
                 name = vendor.DisplayName,
+                quickbooks_id = vendor.Id,
                 //owner = null,
                 //creation = null,
                 //modified = null,

@@ -6,6 +6,7 @@ namespace ERPNextIntegration.Dtos.ErpNext.SalesInvoice
     public class SalesInvoice: IErpNextDto
     {
         public string name { get; set;}
+        public string quickbooks_id { get; set; }
         public string owner { get; set;}
         public DateTimeOffset? creation { get; set;}
         public DateTimeOffset? modified { get; set;}

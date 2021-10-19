@@ -13,6 +13,7 @@ namespace ERPNextIntegration.Dtos.QBO.QboExtensions
             return new ErpItem
             {
                 //name = qboItem.Id,
+                quickbooks_id = qboItem.Id,
                 owner = "mikie@timelabs.com",
                 //creation = null,
                 //modified = null,
@@ -77,7 +78,6 @@ namespace ERPNextIntegration.Dtos.QBO.QboExtensions
                 //publish_in_hub = null,
                 //synced_with_hub = null,
                 //doctype = null,
-                /*
                 uoms = new List<UnitOfMeasurement>
                 {
                     new UnitOfMeasurement
@@ -118,7 +118,6 @@ namespace ERPNextIntegration.Dtos.QBO.QboExtensions
                         doctype = "Item Default"
                     }
                 }
-                */
             };
         }
     }

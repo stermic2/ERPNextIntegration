@@ -19,7 +19,7 @@ namespace ERPNextIntegration.Dtos.QBO.QboExtensions
         public static IErpNextDto ToErpInvoice(this Invoice invoice)
         {
             var salesInvoice = invoice.ToErpInvoiceFromSalesTransaction();
-            //salesInvoice.data.status = invoice.invoiceStatus;
+            salesInvoice.status = invoice.invoiceStatus;
             return salesInvoice;
         }
         public static IErpNextDto ToErpInvoice(this SalesReceipt salesReceipt)
@@ -27,12 +27,14 @@ namespace ERPNextIntegration.Dtos.QBO.QboExtensions
             var salesInvoice = salesReceipt.ToErpInvoiceFromSalesTransaction();
             return salesInvoice;
         }
-        public static IErpNextDto ToErpInvoiceFromSalesTransaction(this SalesTransaction salesTransaction)
+
+        private static SalesInvoice ToErpInvoiceFromSalesTransaction(this SalesTransaction salesTransaction)
         {
             var baseTotal = salesTransaction.Line?.Select(x => x.Amount).Sum();
             return new SalesInvoice
             {
                 name = salesTransaction.Id,
+                quickbooks_id = salesTransaction.Id,
                 owner = "mikie@timelabs.com",
                 //creation = invoice.MetaData?.CreateTime,
                 //modified = invoice.MetaData?.LastUpdatedTime,

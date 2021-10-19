@@ -2,9 +2,13 @@ using Autofac;
 using AutoMapper;
 using AutoMapper.EquivalencyExpression;
 using DynamicCQ.AutofacExtensions;
+using DynamicCQ.RequestEncapsulation;
+using ERPNextIntegration.Controllers.ControllerHelpers.WebhookMethods.EntityProcessesBasedOnWebhook;
+using ERPNextIntegration.Controllers.ControllerHelpers.WebhookMethods.EntityProcessesBasedOnWebhook.EntityProcessHelpers;
 using ERPNextIntegration.Dtos.QBO;
 using ERPNextIntegration.IntegrationRelationships;
 using MediatR;
+using QuickBooksSharp.Entities;
 
 namespace ERPNextIntegration
 {

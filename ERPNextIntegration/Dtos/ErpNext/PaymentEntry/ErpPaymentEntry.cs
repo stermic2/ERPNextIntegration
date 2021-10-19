@@ -5,6 +5,7 @@ namespace ERPNextIntegration.Dtos.ErpNext.PaymentEntry
     public class ErpPaymentEntry : IErpNextDto
     {
         public string name { get; set; }
+        public string quickbooks_id { get; set; }
         public string owner { get; set; }
         public string creation { get; set; }
         public string modified { get; set; }

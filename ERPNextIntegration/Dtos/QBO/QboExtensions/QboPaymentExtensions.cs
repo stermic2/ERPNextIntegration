@@ -21,6 +21,7 @@ namespace ERPNextIntegration.Dtos.QBO.QboExtensions
             return new ErpPaymentEntry
             {
                 name = payment.Id,
+                quickbooks_id = payment.Id,
                 //owner = null,
                 //creation = null,
                 //modified = null,

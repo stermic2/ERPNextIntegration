@@ -13,6 +13,7 @@ namespace ERPNextIntegration.Dtos.QBO.QboExtensions
         {
             return new ErpCustomer{
                 name = customer.FullyQualifiedName,
+                quickbooks_id = customer.Id,
                 //owner = null,
                 //creation = null,
                 //modified = null,
